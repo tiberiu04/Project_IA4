@@ -1,24 +1,33 @@
 import pygame
-import random
 import sys
-from enum import Enum, auto
 
-class GameState(Enum):
-    MAIN_MENU = auto()
-    DIFFICULTY_SELECT = auto()
-    PLAYING = auto()
-    GAME_OVER = auto()
-    SETTINGS = auto()
+pygame.init()
 
-class SnakeGame:
-    def __init__(self):
-        pygame.init()
-    def _quit_game(self):
-        pygame.quit()
+# Screen settings
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 800
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption('Snake Game')
+
+# Colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# Clock
+CLOCK = pygame.time.Clock()
 
 def main():
-    game = SnakeGame()
-    game._quit_game()
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+        SCREEN.fill(WHITE)  # Clear the screen
+        pygame.display.update()
+        CLOCK.tick(30)  # Set the frame rate
 
-if __name__ == '__main__':
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
     main()
