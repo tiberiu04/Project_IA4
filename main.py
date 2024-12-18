@@ -12,11 +12,15 @@ FPS = 10
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLACK = (0, 0, 0)
 
 # Crearea ferestrei jocului
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Snake Game")
 clock = pygame.time.Clock()
+
+# Font pentru afișarea scorului
+FONT = pygame.font.SysFont("arial", 24)
 
 
 class Snake:
@@ -79,11 +83,18 @@ class Food:
                          random.randint(0, (SCREEN_HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE)
 
 
+def draw_score(score):
+    """Funcție pentru afișarea scorului pe ecran."""
+    score_text = FONT.render(f"Score: {score}", True, BLACK)
+    SCREEN.blit(score_text, (10, 10))
+
+
 # Funcția principală a jocului
 def main():
     snake = Snake()
     food = Food()
     running = True
+    score = 0  # Inițializarea scorului
 
     while running:
         for event in pygame.event.get():
@@ -107,6 +118,7 @@ def main():
         if snake.body[0] == food.position:
             snake.grow()
             food.reset()
+            score += 10  # Creșterea scorului cu 10 puncte
 
         # Verificare coliziune cu marginile sau propriul corp
         if snake.check_collision():
@@ -117,6 +129,7 @@ def main():
         SCREEN.fill(WHITE)
         snake.draw()
         food.draw()
+        draw_score(score)  # Afișarea scorului
         pygame.display.update()
         clock.tick(FPS)
 
