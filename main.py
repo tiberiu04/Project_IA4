@@ -1,72 +1,128 @@
 import pygame
+import random
 import sys
 
+# Inițializare Pygame
 pygame.init()
 
-# Screen settings
-SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 800
-SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('Snake Game')
-
-# Colors
-BLACK = (0, 0, 0)
+# Configurări generale
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+CELL_SIZE = 20
+FPS = 10
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
 
-# Clock
-CLOCK = pygame.time.Clock()
+# Crearea ferestrei jocului
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Snake Game")
+clock = pygame.time.Clock()
+
 
 class Snake:
     def __init__(self):
-        self.x = SCREEN_WIDTH // 2
-        self.y = SCREEN_HEIGHT // 2
-        self.size = 40
-        self.change_x = 0
-        self.change_y = 0
-        self.body = [[self.x, self.y]]
-        self.length = 1
+        self.body = [(100, 100), (80, 100), (60, 100)]  # Inițial 3 segmente
+        self.direction = "RIGHT"
+        self.growing = False
 
     def move(self):
-        self.x += self.change_x
-        self.y += self.change_y
-        self.body.append([self.x, self.y])
-        if len(self.body) > self.length:
-            del self.body[0]
+        head_x, head_y = self.body[0]
+
+        if self.direction == "UP":
+            head_y -= CELL_SIZE
+        elif self.direction == "DOWN":
+            head_y += CELL_SIZE
+        elif self.direction == "LEFT":
+            head_x -= CELL_SIZE
+        elif self.direction == "RIGHT":
+            head_x += CELL_SIZE
+
+        new_head = (head_x, head_y)
+
+        if not self.growing:
+            self.body.pop()  # Elimină ultima poziție a șarpelui dacă nu crește
+        else:
+            self.growing = False
+
+        self.body.insert(0, new_head)  # Adaugă noua poziție la început
+
+    def grow(self):
+        self.growing = True
 
     def draw(self):
         for segment in self.body:
-            pygame.draw.rect(SCREEN, BLACK, (segment[0], segment[1], self.size, self.size))
+            pygame.draw.rect(SCREEN, GREEN, (*segment, CELL_SIZE, CELL_SIZE))
 
+    def check_collision(self):
+        # Coliziune cu marginile ecranului
+        head_x, head_y = self.body[0]
+        if head_x < 0 or head_y < 0 or head_x >= SCREEN_WIDTH or head_y >= SCREEN_HEIGHT:
+            return True
+
+        # Coliziune cu propriul corp
+        if self.body[0] in self.body[1:]:
+            return True
+
+        return False
+
+
+class Food:
+    def __init__(self):
+        self.position = (random.randint(0, (SCREEN_WIDTH - CELL_SIZE) // CELL_SIZE) * CELL_SIZE,
+                         random.randint(0, (SCREEN_HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE)
+
+    def draw(self):
+        pygame.draw.rect(SCREEN, RED, (*self.position, CELL_SIZE, CELL_SIZE))
+
+    def reset(self):
+        self.position = (random.randint(0, (SCREEN_WIDTH - CELL_SIZE) // CELL_SIZE) * CELL_SIZE,
+                         random.randint(0, (SCREEN_HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE)
+
+
+# Funcția principală a jocului
 def main():
-    running = True
     snake = Snake()
+    food = Food()
+    running = True
 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    snake.change_x = -snake.size
-                    snake.change_y = 0
-                elif event.key == pygame.K_RIGHT:
-                    snake.change_x = snake.size
-                    snake.change_y = 0
-                elif event.key == pygame.K_UP:
-                    snake.change_y = -snake.size
-                    snake.change_x = 0
-                elif event.key == pygame.K_DOWN:
-                    snake.change_y = snake.size
-                    snake.change_x = 0
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and snake.direction != "DOWN":
+                    snake.direction = "UP"
+                elif event.key == pygame.K_DOWN and snake.direction != "UP":
+                    snake.direction = "DOWN"
+                elif event.key == pygame.K_LEFT and snake.direction != "RIGHT":
+                    snake.direction = "LEFT"
+                elif event.key == pygame.K_RIGHT and snake.direction != "LEFT":
+                    snake.direction = "RIGHT"
+
+        # Mișcarea șarpelui
         snake.move()
+
+        # Verificare coliziune cu mâncarea
+        if snake.body[0] == food.position:
+            snake.grow()
+            food.reset()
+
+        # Verificare coliziune cu marginile sau propriul corp
+        if snake.check_collision():
+            print("Game Over!")
+            running = False
+
+        # Actualizare ecran
         SCREEN.fill(WHITE)
         snake.draw()
+        food.draw()
         pygame.display.update()
-        CLOCK.tick(10)
+        clock.tick(FPS)
 
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main()
