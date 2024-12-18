@@ -21,6 +21,7 @@ clock = pygame.time.Clock()
 
 # Font pentru afișarea scorului
 FONT = pygame.font.SysFont("arial", 24)
+GAME_OVER_FONT = pygame.font.SysFont("arial", 48)
 
 
 class Snake:
@@ -89,6 +90,39 @@ def draw_score(score):
     SCREEN.blit(score_text, (10, 10))
 
 
+def game_over_screen(score):
+    """Funcție pentru afișarea ecranului de Game Over."""
+    SCREEN.fill(WHITE)
+
+    # Mesaj de Game Over
+    game_over_text = GAME_OVER_FONT.render("Game Over!", True, BLACK)
+    SCREEN.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
+
+    # Afișarea scorului final
+    score_text = FONT.render(f"Your Score: {score}", True, BLACK)
+    SCREEN.blit(score_text, (SCREEN_WIDTH // 2 - score_text.get_width() // 2, SCREEN_HEIGHT // 2 + 10))
+
+    # Instrucțiuni pentru continuare
+    restart_text = FONT.render("Press R to Restart or Q to Quit", True, BLACK)
+    SCREEN.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
+
+    pygame.display.update()
+
+    # Buclă pentru ecranul de Game Over
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:  # Repornire
+                    main()
+                elif event.key == pygame.K_q:  # Închidere joc
+                    pygame.quit()
+                    sys.exit()
+
+
 # Funcția principală a jocului
 def main():
     snake = Snake()
@@ -122,7 +156,7 @@ def main():
 
         # Verificare coliziune cu marginile sau propriul corp
         if snake.check_collision():
-            print("Game Over!")
+            game_over_screen(score)  # Afișare ecran Game Over
             running = False
 
         # Actualizare ecran
