@@ -58,6 +58,7 @@ class Snake:
         for segment in self.body:
             pygame.draw.rect(SCREEN, GREEN, (*segment, CELL_SIZE, CELL_SIZE))
 
+
     def check_collision(self):
         # Coliziune cu marginile ecranului
         head_x, head_y = self.body[0]
