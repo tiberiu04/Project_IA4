@@ -19,7 +19,7 @@ SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Snake Game")
 clock = pygame.time.Clock()
 
-# Font pentru afișarea scorului
+# Font pentru afișarea scorului și mesajelor
 FONT = pygame.font.SysFont("arial", 24)
 GAME_OVER_FONT = pygame.font.SysFont("arial", 48)
 
@@ -123,8 +123,42 @@ def game_over_screen(score):
                     sys.exit()
 
 
+def difficulty_selection():
+    """Funcție pentru selectarea dificultății."""
+    SCREEN.fill(WHITE)
+    title_text = GAME_OVER_FONT.render("Select Difficulty", True, BLACK)
+    SCREEN.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, SCREEN_HEIGHT // 2 - 100))
+
+    easy_text = FONT.render("1. Easy (Slow)", True, GREEN)
+    SCREEN.blit(easy_text, (SCREEN_WIDTH // 2 - easy_text.get_width() // 2, SCREEN_HEIGHT // 2 - 30))
+
+    medium_text = FONT.render("2. Medium (Normal)", True, BLACK)
+    SCREEN.blit(medium_text, (SCREEN_WIDTH // 2 - medium_text.get_width() // 2, SCREEN_HEIGHT // 2 + 10))
+
+    hard_text = FONT.render("3. Hard (Fast)", True, RED)
+    SCREEN.blit(hard_text, (SCREEN_WIDTH // 2 - hard_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
+
+    pygame.display.update()
+
+    # Buclă pentru selectarea dificultății
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    return 5  # Dificultate ușoară
+                elif event.key == pygame.K_2:
+                    return 10  # Dificultate medie
+                elif event.key == pygame.K_3:
+                    return 15  # Dificultate dificilă
+
+
 # Funcția principală a jocului
 def main():
+    difficulty = difficulty_selection()  # Selectează dificultatea
     snake = Snake()
     food = Food()
     running = True
@@ -165,7 +199,7 @@ def main():
         food.draw()
         draw_score(score)  # Afișarea scorului
         pygame.display.update()
-        clock.tick(FPS)
+        clock.tick(difficulty)  # Ajustează viteza în funcție de dificultate
 
     pygame.quit()
     sys.exit()
