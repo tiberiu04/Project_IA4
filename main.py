@@ -13,6 +13,7 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
+GRAY = (169, 169, 169)  # Culoare pentru obstacole
 
 # Crearea ferestrei jocului
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -58,8 +59,7 @@ class Snake:
         for segment in self.body:
             pygame.draw.rect(SCREEN, GREEN, (*segment, CELL_SIZE, CELL_SIZE))
 
-
-    def check_collision(self):
+    def check_collision(self, obstacles):
         # Coliziune cu marginile ecranului
         head_x, head_y = self.body[0]
         if head_x < 0 or head_y < 0 or head_x >= SCREEN_WIDTH or head_y >= SCREEN_HEIGHT:
@@ -67,6 +67,10 @@ class Snake:
 
         # Coliziune cu propriul corp
         if self.body[0] in self.body[1:]:
+            return True
+
+        # Coliziune cu obstacolele
+        if self.body[0] in obstacles:
             return True
 
         return False
@@ -83,6 +87,19 @@ class Food:
     def reset(self):
         self.position = (random.randint(0, (SCREEN_WIDTH - CELL_SIZE) // CELL_SIZE) * CELL_SIZE,
                          random.randint(0, (SCREEN_HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE)
+
+
+class Obstacles:
+    def __init__(self, num_obstacles):
+        self.positions = []
+        for _ in range(num_obstacles):
+            x = random.randint(0, (SCREEN_WIDTH - CELL_SIZE) // CELL_SIZE) * CELL_SIZE
+            y = random.randint(0, (SCREEN_HEIGHT - CELL_SIZE) // CELL_SIZE) * CELL_SIZE
+            self.positions.append((x, y))
+
+    def draw(self):
+        for position in self.positions:
+            pygame.draw.rect(SCREEN, GRAY, (*position, CELL_SIZE, CELL_SIZE))
 
 
 def draw_score(score):
@@ -162,6 +179,7 @@ def main():
     difficulty = difficulty_selection()  # Selectează dificultatea
     snake = Snake()
     food = Food()
+    obstacles = Obstacles(num_obstacles=10)  # Creează 10 obstacole
     running = True
     score = 0  # Inițializarea scorului
 
@@ -189,8 +207,8 @@ def main():
             food.reset()
             score += 10  # Creșterea scorului cu 10 puncte
 
-        # Verificare coliziune cu marginile sau propriul corp
-        if snake.check_collision():
+        # Verificare coliziune cu marginile, propriul corp sau obstacole
+        if snake.check_collision(obstacles.positions):
             game_over_screen(score)  # Afișare ecran Game Over
             running = False
 
@@ -198,6 +216,7 @@ def main():
         SCREEN.fill(WHITE)
         snake.draw()
         food.draw()
+        obstacles.draw()
         draw_score(score)  # Afișarea scorului
         pygame.display.update()
         clock.tick(difficulty)  # Ajustează viteza în funcție de dificultate
